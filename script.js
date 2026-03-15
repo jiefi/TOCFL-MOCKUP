@@ -918,7 +918,7 @@ return temp
 
 function startTest(){
 
-questions=shuffle(buildQuestions()).slice(0,10)
+questions=shuffle(buildQuestions()).slice(0,45)
 
 current=0
 score=0
