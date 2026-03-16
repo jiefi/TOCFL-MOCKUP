@@ -1235,6 +1235,20 @@ document.getElementById("review").innerHTML=""
 
 }
 
+function saveProgress(){
+
+let data={
+questions:questions,
+current:current,
+score:score,
+userAnswers:userAnswers,
+wrongList:wrongList,
+bookmarked:bookmarked
+}
+
+localStorage.setItem("tocflProgress",JSON.stringify(data))
+
+}
 
 
-startTest()
+loadProgress()
