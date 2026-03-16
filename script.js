@@ -1080,12 +1080,19 @@ Bookmarked Questions: ${bookmarked.length}
 
 <button onclick="reviewBookmark()">Review Bookmark</button>
 
-<button onclick="startTest()">Retry Test</button>
+<button onclick="resetTest()">Retry Test</button>
 
 `
 
 
 document.getElementById("result").innerHTML=html
+
+}
+
+function resetTest(){
+
+localStorage.removeItem("tocflProgress")
+startTest()
 
 }
 
@@ -1250,5 +1257,29 @@ localStorage.setItem("tocflProgress",JSON.stringify(data))
 
 }
 
+function loadProgress(){
+
+let saved=localStorage.getItem("tocflProgress")
+
+if(saved){
+
+let data=JSON.parse(saved)
+
+questions=data.questions
+current=data.current
+score=data.score
+userAnswers=data.userAnswers
+wrongList=data.wrongList
+bookmarked=data.bookmarked
+
+showQuestion()
+
+}else{
+
+startTest()
+
+}
+
+}
 
 loadProgress()
