@@ -1025,26 +1025,19 @@ let ans=parseInt(selected.value)
 userAnswers.push(ans)
 
 if(ans===questions[current].answer){
-
 score++
-
 }else{
-
 wrongList.push(current)
-
 }
 
 current++
 
+saveProgress()   // ← TAMBAH INI
+
 if(current<questions.length){
-
 showQuestion()
-
-
 }else{
-
 finish()
-
 }
 
 }
