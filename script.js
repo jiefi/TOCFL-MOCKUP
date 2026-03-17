@@ -2282,12 +2282,14 @@ parent = parent.parentNode
 
 let span = document.createElement("span")
 span.className = "note"
+
 let py = getPinyin(text)
 
 span.innerHTML = `
-<span class="note-text">${py}</span>
-${text}
+<div class="pinyin">${py}</div>
+<div class="hanzi">${text}</div>
 `
+
 // pastikan ga ada icon lama
 let oldIcon = span.querySelector(".note-icon")
 if(oldIcon) oldIcon.remove()
@@ -2332,6 +2334,7 @@ window.getSelection().removeAllRanges()
 
 
 }
+
 
 function openNoteEditor(e){
 
