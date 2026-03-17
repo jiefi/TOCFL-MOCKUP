@@ -1822,7 +1822,7 @@ toneType: "symbol" // nǐ hǎo
 
 function startTest(){
 
-questions=shuffle(buildQuestions()).slice(0,45)
+questions=shuffle(buildQuestions()).slice(0,5)
 
 current=0
 score=0
