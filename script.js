@@ -2334,7 +2334,7 @@ window.getSelection().removeAllRanges()
 
 
 }
-
+console.log("pinyinPro:", typeof pinyinPro)
 
 function openNoteEditor(e){
 
