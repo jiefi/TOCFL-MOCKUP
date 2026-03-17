@@ -1769,7 +1769,8 @@ answer:2
 function shuffle(array){
 return array.sort(()=>Math.random()-0.5)
 }
-
+let studyList = []
+let wordStats = {}
 let questions=[]
 let current=0
 let score=0
@@ -1777,7 +1778,7 @@ let wrongList=[]
 let userAnswers=[]
 let bookmarked=[]
 let lastPassage=""
-
+let isSelecting = false
 
 function buildQuestions(){
 
@@ -1801,6 +1802,7 @@ answer:q.answer
 
 }
 
+
 // NORMAL QUESTION
 else{
 
@@ -1811,6 +1813,11 @@ temp.push(item)
 })
 
 return temp
+}
+function getPinyin(text){
+return pinyinPro.pinyin(text, {
+toneType: "symbol" // nǐ hǎo
+})
 }
 
 function startTest(){
@@ -1863,9 +1870,10 @@ let highlightedPassage = q.passage.replace(
 )
 
 html+=`
-<div class="passage">
+<div class="passage" onmouseup="openNoteEditor(event)">
 ${highlightedPassage}
 </div>
+
 `
 
 }
@@ -1929,6 +1937,7 @@ if(ans===questions[current].answer){
 score++
 }else{
 wrongList.push(current)
+extractWords(questions[current])
 }
 
 current++
@@ -1940,6 +1949,28 @@ showQuestion()
 }else{
 finish()
 }
+
+}
+
+function extractWords(q){
+
+if(!q.passage) return
+
+let text = q.passage
+
+let words = text.match(/[\u4e00-\u9fff]{2,}/g)
+
+if(!words) return
+
+words.forEach(w=>{
+
+if(!wordStats[w]){
+wordStats[w] = {count:0, wrong:0}
+}
+
+wordStats[w].wrong++
+
+})
 
 }
 //TOGGLE
@@ -1986,6 +2017,7 @@ Bookmarked Questions: ${bookmarked.length}
 
 <button onclick="resetTest()">Retry Test</button>
 
+<button onclick="openStudyMode()">Study Mode</button>
 `
 
 
@@ -2161,6 +2193,338 @@ localStorage.setItem("tocflProgress",JSON.stringify(data))
 
 }
 
+function addNote(){
+
+let selection = window.getSelection()
+let text = selection.toString().trim()
+
+if(!text) return
+
+let meaning = prompt("Masukkan arti / pinyin:")
+
+if(!meaning) return
+
+let range = selection.getRangeAt(0)
+
+let span = document.createElement("span")
+span.className = "note"
+span.setAttribute("data-note", meaning)
+span.textContent = text
+
+span.onclick = function(e){
+
+e.stopPropagation()
+
+let popup = document.createElement("div")
+popup.className = "note-popup"
+
+popup.innerHTML = `
+<input type="text" placeholder="edit arti">
+<br>
+<button onclick="saveInlineNote(this)">Save</button>
+<button onclick="closePopup(this)">Cancel</button>
+`
+
+document.body.appendChild(popup)
+
+popup.style.top = e.pageY + "px"
+popup.style.left = e.pageX + "px"
+
+popup.targetSpan = span
+
+span.ondblclick = function(e){
+
+e.stopPropagation()
+
+// ambil text asli
+let text = span.childNodes[0].nodeValue
+
+// ganti balik ke text biasa
+let textNode = document.createTextNode(text)
+
+span.replaceWith(textNode)
+
+}
+}
+
+range.deleteContents()
+// 🔥 gabungkan node biar ga kepisah
+range.commonAncestorContainer.normalize()
+// 🔥 gabungkan node biar ga kepisah
+range.commonAncestorContainer.normalize()
+range.insertNode(span)
+
+}
+
+function openNoteEditor(e){
+
+let selection = window.getSelection()
+let text = selection.toString().trim()
+
+if(!text) return
+
+let range = selection.getRangeAt(0)
+// hanya block kalau full di dalam note
+if(isInsideNote(range.startContainer) && isInsideNote(range.endContainer)){
+return
+}
+let parent = range.commonAncestorContainer
+
+while(parent && parent !== document.body){
+
+if(parent.classList && parent.classList.contains("note")){
+return
+}
+
+parent = parent.parentNode
+}
+
+
+let span = document.createElement("span")
+span.className = "note"
+let py = getPinyin(text)
+
+span.innerHTML = `
+<span class="note-text">${py}</span>
+${text}
+`
+// pastikan ga ada icon lama
+let oldIcon = span.querySelector(".note-icon")
+if(oldIcon) oldIcon.remove()
+
+let icon = document.createElement("span")
+icon.className = "note-icon"
+icon.innerText = "✏️"
+
+icon.onclick = function(ev){
+
+ev.stopPropagation()
+let old = document.querySelector(".note-popup")
+if(old) old.remove()
+let popup = document.createElement("div")
+popup.className = "note-popup"
+
+popup.innerHTML = `
+<input type="text" placeholder="arti / pinyin">
+<br>
+<div style="margin-top:8px; display:flex; gap:5px;">
+<button onclick="saveInlineNote(this)">Save</button>
+<button onclick="closePopup(this)">Cancel</button>
+</div>
+`
+
+document.body.appendChild(popup)
+
+popup.style.top = ev.pageY + "px"
+popup.style.left = ev.pageX + "px"
+
+popup.targetSpan = span
+
+}
+
+span.appendChild(icon)
+
+range.deleteContents()
+range.insertNode(span)
+
+window.getSelection().removeAllRanges()
+
+
+
+}
+
+function openNoteEditor(e){
+
+// 🚨 ANTI DOUBLE CLICK
+if(isSelecting) return
+isSelecting = true
+setTimeout(()=>{ isSelecting = false }, 200)
+
+let selection = window.getSelection()
+let text = selection.toString().trim()
+
+// 🚨 FILTER DOUBLE CLICK (1 huruf / auto select)
+if(!text || text.length < 2) return
+
+let range = selection.getRangeAt(0)
+
+// 🔥 bikin DOM rapi dulu
+range.commonAncestorContainer.normalize()
+
+// hanya block kalau full di dalam note
+if(isInsideNote(range.startContainer) && isInsideNote(range.endContainer)){
+return
+}
+
+let parent = range.commonAncestorContainer
+
+while(parent && parent !== document.body){
+
+if(parent.classList && parent.classList.contains("note")){
+return
+}
+
+parent = parent.parentNode
+}
+
+let span = document.createElement("span")
+span.className = "note"
+span.innerText = text
+
+let icon = document.createElement("span")
+icon.className = "note-icon"
+icon.innerText = "✏️"
+
+icon.onclick = function(ev){
+
+ev.stopPropagation()
+
+let old = document.querySelector(".note-popup")
+if(old) old.remove()
+
+let popup = document.createElement("div")
+popup.className = "note-popup"
+
+popup.innerHTML = `
+<input type="text" placeholder="arti / pinyin">
+<br>
+<div style="margin-top:8px; display:flex; gap:5px;">
+<button onclick="saveInlineNote(this)">Save</button>
+<button onclick="closePopup(this)">Cancel</button>
+</div>
+`
+
+document.body.appendChild(popup)
+
+popup.style.top = ev.pageY + "px"
+popup.style.left = ev.pageX + "px"
+
+popup.targetSpan = span
+
+}
+
+span.appendChild(icon)
+
+range.deleteContents()
+range.insertNode(span)
+
+window.getSelection().removeAllRanges()
+
+}
+
+function isInsideNote(node){
+
+while(node && node !== document.body){
+
+if(node.classList && node.classList.contains("note")){
+return true
+}
+
+node = node.parentNode
+}
+
+return false
+
+}
+function closePopup(btn){
+let popup = btn.parentElement.parentElement
+popup.remove()
+}
+
+document.addEventListener("click", function(e){
+
+let popup = document.querySelector(".note-popup")
+
+if(!popup) return
+
+if(!popup.contains(e.target) && !e.target.classList.contains("note-icon")){
+popup.remove()
+}
+
+})
+
+function saveInlineNote(btn){
+
+let popup = btn.closest(".note-popup")
+let input = popup.querySelector("input").value.trim()
+
+if(!input){
+alert("Isi dulu!")
+return
+}
+
+// 🔥 ambil target span
+let span = popup.targetSpan
+
+if(!span){
+console.error("Target span tidak ditemukan")
+popup.remove()
+return
+}
+
+// 🔥 ambil kata asli (tanpa icon)
+let word = span.childNodes[0]?.nodeValue || span.innerText
+word = word.replace("✏️","").trim()
+
+// 🔥 hapus note lama kalau ada
+let oldNote = span.querySelector(".note-text")
+if(oldNote) oldNote.remove()
+
+// 🔥 buat note baru
+let noteText = document.createElement("span")
+noteText.className = "note-text"
+noteText.innerText = input
+
+span.appendChild(noteText)
+
+// 🔥 masuk study system
+addToStudy(word, input)
+
+// tutup popup
+popup.remove()
+
+}
+
+function addToStudy(word, note){
+
+studyList.push({word, note})
+
+if(!wordStats[word]){
+wordStats[word] = {count:0, wrong:0}
+}
+
+wordStats[word].count++
+
+}
+function openStudyMode(){
+
+let html = "<h2>Smart Study Mode 🧠</h2>"
+
+let sorted = Object.keys(wordStats).sort((a,b)=>{
+return wordStats[b].wrong - wordStats[a].wrong
+})
+
+sorted.forEach(word=>{
+
+let stat = wordStats[word]
+
+html += `
+<div class="card">
+<div class="word">${word}</div>
+<div class="stat">
+Wrong: ${stat.wrong} | Seen: ${stat.count}
+</div>
+</div>
+`
+
+})
+
+html += `<br><button onclick="backToResult()">Back</button>`
+
+document.getElementById("review").innerHTML = html
+
+}
+
 function loadProgress(){
 
 let saved=localStorage.getItem("tocflProgress")
@@ -2183,6 +2547,8 @@ showQuestion()
 startTest()
 
 }
-
+document.addEventListener("dblclick", function(){
+window.getSelection().removeAllRanges()
+})
 }
 loadProgress()

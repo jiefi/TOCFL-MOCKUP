@@ -167,3 +167,54 @@ width:0%;
 background:#4facfe;
 transition:width 0.3s ease;
 }
+
+.note{
+position:relative;
+background:#fff176;
+padding:2px 4px;
+border-radius:4px;
+margin:0 1px;
+}
+
+.note-text{
+position:absolute;
+top:-16px;
+left:0;
+font-size:10px;
+color:#333;
+white-space:nowrap;
+}
+
+.note-icon{
+margin-left:4px;
+cursor:pointer;
+font-size:12px;
+}
+
+.note-popup{
+position:absolute;
+background:white;
+border:1px solid #ddd;
+padding:10px;
+border-radius:10px;
+z-index:999;
+}
+
+.card{
+background:white;
+padding:15px;
+margin:10px 0;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+.word{
+font-size:22px;
+font-weight:bold;
+}
+
+.stat{
+font-size:13px;
+color:#666;
+}
+
