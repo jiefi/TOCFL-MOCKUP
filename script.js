@@ -1765,7 +1765,15 @@ answer:2
 },
 
 ]
-
+function getPinyin(text){
+if(typeof pinyinPro === "undefined"){
+console.error("pinyinPro belum ke-load")
+return ""
+}
+return pinyinPro.pinyin(text, {
+toneType: "symbol"
+})
+}
 function shuffle(array){
 return array.sort(()=>Math.random()-0.5)
 }
@@ -2476,7 +2484,12 @@ if(oldNote) oldNote.remove()
 // 🔥 buat note baru
 let noteText = document.createElement("span")
 noteText.className = "note-text"
-noteText.innerText = input
+let py = getPinyin(word)
+
+noteText.innerHTML = `
+<div class="pinyin">${py}</div>
+<div>${input}</div>
+`
 
 span.appendChild(noteText)
 
