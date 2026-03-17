@@ -1822,7 +1822,7 @@ toneType: "symbol" // nǐ hǎo
 
 function startTest(){
 
-questions=shuffle(buildQuestions()).slice(0,5)
+questions=shuffle(buildQuestions()).slice(0,45)
 
 current=0
 score=0
@@ -2551,4 +2551,5 @@ document.addEventListener("dblclick", function(){
 window.getSelection().removeAllRanges()
 })
 }
+document.addEventListener("mouseup", openNoteEditor)
 loadProgress()
