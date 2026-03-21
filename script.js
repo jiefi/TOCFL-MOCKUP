@@ -1858,7 +1858,7 @@ function showHome() {
 }
 function startTest() {
   showQuiz();
-  questions = shuffle(buildQuestions()).slice(0, 5);
+  questions = shuffle(buildQuestions()).slice(0, 45);
 
   current = 0;
   score = 0;
