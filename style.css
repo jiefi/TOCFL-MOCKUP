@@ -24,6 +24,8 @@ body {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
+
+
 h1 {
   text-align: center;
 }
@@ -73,10 +75,8 @@ button:hover {
   background: #3a8de0;
 }
 
-.progress {
-  margin-bottom: 15px;
-  color: #666;
-}
+
+
 
 .review-question {
   margin-bottom: 25px;
@@ -150,7 +150,47 @@ button:hover {
     border-radius: 0;
     padding: 20px;
   }
+  .quiz-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .quiz-header h1 {
+    text-align: left;
+    width: 100%;
+  }
+
+  .home-top-btn {
+    align-self: flex-end;
+  }
 }
+
+.quiz-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.quiz-header h1 {
+  margin: 0;
+  flex: 1;
+  text-align: center;
+}
+
+.home-top-btn {
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 14px;
+  border: none;
+  border-radius: 10px;
+  background: #111827;
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
 
 .progress-bar-container {
   width: 100%;
@@ -167,15 +207,7 @@ button:hover {
   background: #4facfe;
   transition: width 0.3s ease;
 }
-.note {
-  position: relative;
-  display: inline-block;
-  background: #fff176;
-  padding: 2px 4px;
-  border-radius: 4px;
-  margin: 0 2px;
-  text-align: center;
-}
+
 .note-text {
   display: block;
   font-size: 12px;
@@ -199,30 +231,25 @@ button:hover {
   font-size: 18px;
 }
 
-/*.note-text{
-position:absolute;
-top:-18px;
-left:0;
-font-size:10px;
-color:#333;
-white-space:nowrap;
-} */
-/* .note-text{
-position:absolute;
-top:-20px;
-left:0;
-font-size:12px;
-color:red; /* sementara biar keliatan */
-
 .note-hanzi {
   display: inline-block;
+}
+.note {
+  display: inline-block;
+  background: #fff176;
+  padding: 2px 6px;
+  border-radius: 6px;
+  margin: 0 2px;
+  line-height: 1.5;
 }
 
 .note-icon {
   margin-left: 4px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 11px;
+  vertical-align: middle;
 }
+
 
 .note-popup {
   position: absolute;
@@ -234,11 +261,11 @@ color:red; /* sementara biar keliatan */
 }
 
 .card {
-  background: white;
-  padding: 15px;
+  background: #fff;
+  padding: 16px;
   margin: 10px 0;
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
 }
 
 .word {
@@ -249,4 +276,255 @@ color:red; /* sementara biar keliatan */
 .stat {
   font-size: 13px;
   color: #666;
+}
+.subtitle {
+  font-size: 12px;
+  color: #888;
+  margin-top: -10px;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+#homeScreen {
+  display: block;
+}
+
+#quiz,
+#result,
+#review,
+#nextBtn {
+  display: none;
+}
+.quiz-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.progress {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.flashcard {
+  max-width: 420px;
+  margin: 20px auto;
+  padding: 40px 24px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  cursor: pointer;
+}
+
+.flash-word {
+  font-size: 40px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.flash-note {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.flash-pinyin {
+  font-size: 18px;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+.flash-hint {
+  font-size: 14px;
+  color: #999;
+}
+
+#result {
+  margin-top: 24px;
+  text-align: center;
+}
+
+#result h2 {
+  font-size: 28px;
+  margin-bottom: 12px;
+  color: #1f2937;
+}
+
+#result p {
+  font-size: 16px;
+  color: #4b5563;
+  margin: 8px 0;
+}
+
+.result-actions {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.result-actions button {
+  width: 100%;
+  margin: 0;
+}
+/* =========================
+   HOME SCREEN ONLY
+========================= */
+
+
+.home-card {
+  width: 100%;
+  max-width: 520px;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 28px;
+  padding: 34px 24px 24px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.14);
+  box-sizing: border-box;
+}
+
+.home-badge {
+  display: inline-block;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #2563eb;
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  margin-bottom: 14px;
+}
+
+.home-card h1 {
+  margin: 0;
+  font-family: "Montserrat", sans-serif;
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.6px;
+  color: #111827;
+}
+
+.home-card .subtitle {
+  margin: 10px 0 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  letter-spacing: 0.3px;
+}
+
+.guide-list {
+ margin-top: 24px;
+  display: grid;
+  gap: 12px;
+  text-align: center;
+}
+
+.guide-item {
+  background: #f8fbff;
+  border: 1px solid #e8eefc;
+  border-radius: 18px;
+  padding: 15px 18px;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+  line-height: 1.5;
+}
+.home {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  box-sizing: border-box;
+}
+
+.home-actions {
+  margin-top: 24px;
+  display: grid;
+  gap: 12px;
+}
+
+.home .primary-btn,
+.home .secondary-btn {
+  width: 100%;
+  border: none;
+  border-radius: 16px;
+  padding: 15px 18px;
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+}
+
+.home .primary-btn {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: #ffffff;
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.22);
+}
+
+.home .secondary-btn {
+  background: #111827;
+  color: #ffffff;
+}
+
+.home .primary-btn:hover,
+.home .secondary-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.97;
+}
+
+.home .credit {
+  margin-top: 18px;
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #9ca3af;
+}
+
+/* mobile */
+@media (max-width: 600px) {
+  .home {
+    padding: 16px;
+  }
+
+  .home-card {
+    padding: 28px 18px 20px;
+    border-radius: 22px;
+  }
+
+  .home-card h1 {
+    font-size: 28px;
+  }
+
+  .home-card .subtitle {
+    font-size: 13px;
+  }
+
+  .guide-item {
+    font-size: 13px;
+    padding: 12px 13px;
+  }
+
+  .home .primary-btn,
+  .home .secondary-btn {
+    font-size: 14px;
+    padding: 14px 16px;
+  }
+}
+
+.danger-btn {
+  background: #dc2626;
+  color: #fff;
+}
+
+.danger-btn:hover {
+  background: #b91c1c;
 }

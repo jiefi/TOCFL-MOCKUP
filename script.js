@@ -1777,7 +1777,11 @@ toneType: "symbol"
 function shuffle(array){
 return array.sort(()=>Math.random()-0.5)
 }
-let studyList = []
+
+let studyList = [];
+let flashcards = [];
+let flashIndex = 0;
+let showAnswer = false;
 let wordStats = {}
 let questions=[]
 let current=0
@@ -1822,109 +1826,122 @@ temp.push(item)
 
 return temp
 }
-function getPinyin(text){
-return pinyinPro.pinyin(text, {
-toneType: "symbol" // nǐ hǎo
-})
+
+function updateProgressBar() {
+  const progressBar = document.getElementById("progressBar");
+  if (!progressBar || questions.length === 0) return;
+
+  const progressPercent = (current / questions.length) * 100;
+  progressBar.style.width = progressPercent + "%";
 }
 
-function startTest(){
-
-questions=shuffle(buildQuestions()).slice(0,45)
-
-current=0
-score=0
-wrongList=[]
-userAnswers=[]
-
-document.getElementById("result").innerHTML=""
-document.getElementById("review").innerHTML=""
-document.getElementById("nextBtn").style.display="block"
-
-showQuestion()
-
+function showQuiz() {
+  document.getElementById("homeScreen").style.display = "none";
+  document.getElementById("quizScreen").style.display = "block";
+  document.getElementById("quiz").style.display = "block";
+  document.getElementById("nextBtn").style.display = "block";
 }
 
-function showQuestion(){
+function showHome() {
+  document.getElementById("homeScreen").style.display = "flex";
+  document.getElementById("quizScreen").style.display = "none";
+  document.getElementById("quiz").style.display = "none";
+  document.getElementById("result").style.display = "none";
+  document.getElementById("review").style.display = "none";
+  document.getElementById("nextBtn").style.display = "none";
 
-let progressPercent = ((current) / questions.length) * 100
-document.getElementById("progressBar").style.width = progressPercent + "%"
+  document.getElementById("result").innerHTML = "";
+  document.getElementById("review").innerHTML = "";
 
-let q=questions[current]
+  const progressBar = document.getElementById("progressBar");
+  if (progressBar) progressBar.style.width = "0%";
+}
+function startTest() {
+  showQuiz();
+  questions = shuffle(buildQuestions()).slice(0, 5);
 
-let html=`
-<div class="progress">
-Question ${current+1} / ${questions.length}
-</div>
-`
+  current = 0;
+  score = 0;
+  wrongList = [];
+  userAnswers = [];
+  bookmarked = [];
 
-let marked = bookmarked.includes(current)
+  document.getElementById("result").innerHTML = "";
+  document.getElementById("review").innerHTML = "";
+  document.getElementById("result").style.display = "block";
+  document.getElementById("review").style.display = "block";
+  document.getElementById("nextBtn").style.display = "block";
 
-html+=`
-<button onclick="toggleBookmark()" class="bookmark-btn ${marked ? "active":""}">
-⭐ Bookmark
-</button>
-`
-
-
-
-if(q.passage){
-
-let blankNumber = q.text.replace(/[()]/g,'')
-
-let highlightedPassage = q.passage.replace(
-`..${blankNumber}..`,
-`<span class="active-blank">..${blankNumber}..</span>`
-)
-
-html+=`
-<div class="passage" onmouseup="openNoteEditor(event)">
-${highlightedPassage}
-</div>
-
-`
-
+  updateProgressBar();
+  showQuestion();
 }
 
-if(q.image){
 
-html+=`<img src="${q.image}" class="question-image">`
 
+function showQuestion() {
+  updateProgressBar();
+
+  let q = questions[current];
+
+  let html = `
+    <h2 class="quiz-title">TOCFL Reading Mock Test</h2>
+    <div class="progress">
+      Question ${current + 1} / ${questions.length}
+    </div>
+  `;
+
+  let marked = bookmarked.includes(current);
+
+  html += `
+    <button onclick="toggleBookmark()" class="bookmark-btn ${marked ? "active" : ""}">
+      ⭐ Bookmark
+    </button>
+  `;
+
+  if (q.passage) {
+    let blankNumber = q.text.replace(/[()]/g, "");
+    let highlightedPassage = q.passage.replace(
+      `..${blankNumber}..`,
+      `<span class="active-blank">..${blankNumber}..</span>`
+    );
+
+    html += `
+      <div class="passage" onmouseup="openNoteEditor(event)">
+        ${highlightedPassage}
+      </div>
+    `;
+  }
+
+  if (q.image) {
+    html += `<img src="${q.image}" class="question-image">`;
+  }
+
+  if (q.passage) {
+    let blankNumber = q.text.replace(/[()]/g, "");
+    html += `
+      <div class="question">
+        <b>請選擇填入第 ${blankNumber} 個空格最適合的答案</b>
+      </div>
+    `;
+  }
+
+  html += `
+    <div class="question">
+      ${q.text || ""}
+    </div>
+  `;
+
+  q.options.forEach((opt, i) => {
+    html += `
+      <label class="option">
+        <input type="radio" name="answer" value="${i}">
+        ${opt}
+      </label>
+    `;
+  });
+
+  document.getElementById("quiz").innerHTML = html;
 }
-
-if(q.passage){
-
-let blankNumber = q.text.replace(/[()]/g,'')
-
-html+=`
-<div class="question">
-<b>請選擇填入第 ${blankNumber} 個空格最適合的答案</b>
-</div>
-`
-
-}
-
-html+=`
-<div class="question">
-${q.text || ""}
-</div>
-`
-
-q.options.forEach((opt,i)=>{
-
-html+=`
-<label class="option">
-<input type="radio" name="answer" value="${i}">
-${opt}
-</label>
-`
-
-})
-
-document.getElementById("quiz").innerHTML=html
-
-}
-
 document.getElementById("nextBtn").addEventListener("click",nextQuestion)
 // next question
 
@@ -1999,40 +2016,55 @@ showQuestion()
 }
 
 
-function finish(){
+function finish() {
+  document.getElementById("progressBar").style.width = "100%";
+  document.getElementById("quiz").innerHTML = "";
+  document.getElementById("nextBtn").style.display = "none";
 
-document.getElementById("progressBar").style.width = "100%"
+  let html = `
+    <h2>Test Finished 🎉</h2>
+    <p>Score: ${score} / ${questions.length}</p>
+    <p>Bookmarked Questions: ${bookmarked.length}</p>
 
-document.getElementById("quiz").innerHTML=""
+    <div class="result-actions">
+      <button onclick="reviewWrong()">Review Wrong</button>
+      <button onclick="reviewBookmark()">Review Bookmark</button>
+      <button onclick="openStudyMode()">Study Mode</button>
+      <button onclick="resetTest()">Retry Test</button>
+      <button onclick="goHome()">Back to Home</button>
+    </div>
+  `;
 
-document.getElementById("nextBtn").style.display="none"
+  document.getElementById("result").innerHTML = html;
+  document.getElementById("result").style.display = "block";
+  document.getElementById("review").style.display = "none";
 
-let html=`
-
-<h2>Test Finished 🎉</h2>
-
-Score: ${score} / ${questions.length}
-
-<br><br>
-
-Bookmarked Questions: ${bookmarked.length}
-
-<br><br>
-
-<button onclick="reviewWrong()">Review Wrong</button>
-
-<button onclick="reviewBookmark()">Review Bookmark</button>
-
-<button onclick="resetTest()">Retry Test</button>
-
-<button onclick="openStudyMode()">Study Mode</button>
-`
-
-
-document.getElementById("result").innerHTML=html
-
+  localStorage.removeItem("tocflProgress");
 }
 
+function goHome() {
+  localStorage.removeItem("tocflProgress");
+
+  questions = [];
+  current = 0;
+  score = 0;
+  wrongList = [];
+  userAnswers = [];
+  bookmarked = [];
+
+  document.getElementById("quiz").innerHTML = "";
+  document.getElementById("result").innerHTML = "";
+  document.getElementById("review").innerHTML = "";
+
+  document.getElementById("homeScreen").style.display = "flex";
+  document.getElementById("quizScreen").style.display = "none";
+  document.getElementById("result").style.display = "none";
+  document.getElementById("review").style.display = "none";
+  document.getElementById("nextBtn").style.display = "none";
+
+  const progressBar = document.getElementById("progressBar");
+  if (progressBar) progressBar.style.width = "0%";
+}
 function resetTest(){
 
 localStorage.removeItem("tocflProgress")
@@ -2040,150 +2072,97 @@ startTest()
 
 }
 
-function reviewWrong(){
+function reviewWrong() {
+  let html = `
+    <h2>Review Wrong Answers</h2>
+    <button onclick="backToResult()" class="back-btn">← Back to Result</button>
+  `;
 
-let html=`
+  wrongList.forEach(index => {
+    let q = questions[index];
+    let user = userAnswers[index];
 
-<h2>Review Wrong Answers</h2>
+    html += `<div class="review-question">`;
 
-<button onclick="backToResult()" class="back-btn">
-← Back to Result
-</button>
+    if (q.passage) {
+      let blankNumber = q.text.replace(/[()]/g, "");
+      let pattern = new RegExp(`\\.\\.${blankNumber}\\.\\.`, "g");
 
-`
+      let highlightedPassage = q.passage.replace(
+        pattern,
+        `<span class="active-blank">..${blankNumber}..</span>`
+      );
 
-wrongList.forEach(index=>{
+      html += `<div class="passage">${highlightedPassage}</div>`;
+    }
 
-let q=questions[index]
-let user=userAnswers[index]
+    if (q.image) {
+      html += `<img src="${q.image}" class="question-image">`;
+    }
 
-html+=`<div class="review-question">`
+    html += `<div class="question">${q.text || ""}</div>`;
 
-if(q.passage){
+    q.options.forEach((opt, i) => {
+      let className = "option";
+      if (i === q.answer) className += " correct";
+      if (i === user && user !== q.answer) className += " wrong";
+      html += `<div class="${className}">${opt}</div>`;
+    });
 
-let blankNumber = q.text.replace(/[()]/g,'')
+    if (q.explanation) {
+      html += `
+        <div class="explanation">
+          Explanation: ${q.explanation}
+        </div>
+      `;
+    }
 
-let pattern = new RegExp(`\\.\\.${blankNumber}\\.\\.`, "g")
+    html += `</div>`;
+  });
 
-let highlightedPassage = q.passage.replace(
-pattern,
-`<span class="active-blank">..${blankNumber}..</span>`
-)
+  document.getElementById("review").innerHTML = html;
+  document.getElementById("result").style.display = "none";
+  document.getElementById("review").style.display = "block";
+}
+function reviewBookmark() {
+  let html = `
+    <h2>Bookmarked Questions</h2>
+    <button onclick="backToResult()" class="back-btn">← Back to Result</button>
+  `;
 
-if(q.passage !== lastPassage){
+  bookmarked.forEach(index => {
+    let q = questions[index];
 
-html+=`
-<div class="passage">
-${highlightedPassage}
-</div>
-`
+    html += `<div class="review-question">`;
 
-lastPassage = q.passage
+    if (q.passage) {
+      html += `<div class="passage">${q.passage}</div>`;
+    }
 
-}else{
+    if (q.image) {
+      html += `<img src="${q.image}" class="question-image">`;
+    }
 
-html+=`
-<div class="passage">
-${highlightedPassage}
-</div>
-`
+    html += `<div class="question">${q.text || ""}</div>`;
 
+    q.options.forEach((opt, i) => {
+      let className = "option";
+      if (i === q.answer) className += " correct";
+      html += `<div class="${className}">${opt}</div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  document.getElementById("review").innerHTML = html;
+  document.getElementById("result").style.display = "none";
+  document.getElementById("review").style.display = "block";
 }
 
-}
-
-if(q.image){
-
-html+=`<img src="${q.image}" class="question-image">`
-
-}
-
-html+=`<div class="question">${q.text || ""}</div>`
-
-q.options.forEach((opt,i)=>{
-
-let className="option"
-
-
-if(i===q.answer){
-className+=" correct"
-}
-
-if(i===user && user!==q.answer){
-className+=" wrong"
-}
-
-html+=`<div class="${className}">${opt}</div>`
-
-})
-
-if(q.explanation){
-html+=`
-<div class="explanation">
-Explanation: ${q.explanation}
-</div>
-`
-}
-
-html+="</div>"
-
-})
-
-document.getElementById("review").innerHTML=html
-
-}
-function reviewBookmark(){
-
-let html=`
-
-<h2>Bookmarked Questions</h2>
-
-<button onclick="backToResult()" class="back-btn">
-← Back to Result
-</button>
-
-`
-
-bookmarked.forEach(index=>{
-
-let q=questions[index]
-
-html+=`<div class="review-question">`
-
-if(q.passage){
-html+=`<div class="passage">${q.passage}</div>`
-}
-
-if(q.image){
-html+=`<img src="${q.image}" class="question-image">`
-}
-
-html+=`<div class="question">${q.text || ""}</div>`
-
-q.options.forEach((opt,i)=>{
-
-let className="option"
-
-if(i===q.answer){
-className+=" correct"
-}
-
-html+=`<div class="${className}">${opt}</div>`
-
-})
-
-html+="</div>"
-
-})
-
-document.getElementById("review").innerHTML=html
-
-}
-
-function backToResult(){
-
-document.getElementById("review").innerHTML=""
-
+function backToResult() {
+  document.getElementById("review").innerHTML = "";
+  document.getElementById("review").style.display = "none";
+  document.getElementById("result").style.display = "block";
 }
 
 function saveProgress(){
@@ -2199,6 +2178,16 @@ bookmarked:bookmarked
 
 localStorage.setItem("tocflProgress",JSON.stringify(data))
 
+}
+function saveStudyNotes() {
+  localStorage.setItem("tocflStudyList", JSON.stringify(studyList));
+}
+
+function loadStudyNotes() {
+  let saved = localStorage.getItem("tocflStudyList");
+  if (saved) {
+    studyList = JSON.parse(saved);
+  }
 }
 
 function addNote(){
@@ -2264,163 +2253,93 @@ range.insertNode(span)
 
 }
 
-function openNoteEditor(e){
 
-let selection = window.getSelection()
-let text = selection.toString().trim()
-
-if(!text) return
-
-let range = selection.getRangeAt(0)
-// hanya block kalau full di dalam note
-if(isInsideNote(range.startContainer) && isInsideNote(range.endContainer)){
-return
-}
-let parent = range.commonAncestorContainer
-
-while(parent && parent !== document.body){
-
-if(parent.classList && parent.classList.contains("note")){
-return
-}
-
-parent = parent.parentNode
-}
-
-
-let span = document.createElement("span")
-span.className = "note"
-
-let py = getPinyin(text)
-
-span.innerHTML = `
-<div class="pinyin">${py}</div>
-<div class="hanzi">${text}</div>
-`
-
-// pastikan ga ada icon lama
-let oldIcon = span.querySelector(".note-icon")
-if(oldIcon) oldIcon.remove()
-
-let icon = document.createElement("span")
-icon.className = "note-icon"
-icon.innerText = "✏️"
-
-icon.onclick = function(ev){
-
-ev.stopPropagation()
-let old = document.querySelector(".note-popup")
-if(old) old.remove()
-let popup = document.createElement("div")
-popup.className = "note-popup"
-
-popup.innerHTML = `
-<input type="text" placeholder="arti / pinyin">
-<br>
-<div style="margin-top:8px; display:flex; gap:5px;">
-<button onclick="saveInlineNote(this)">Save</button>
-<button onclick="closePopup(this)">Cancel</button>
-</div>
-`
-
-document.body.appendChild(popup)
-
-popup.style.top = ev.pageY + "px"
-popup.style.left = ev.pageX + "px"
-
-popup.targetSpan = span
-
-}
-
-span.appendChild(icon)
-
-range.deleteContents()
-range.insertNode(span)
-
-window.getSelection().removeAllRanges()
-
-
-
-}
 console.log("pinyinPro:", typeof pinyinPro)
 
-function openNoteEditor(e){
+function openNoteEditor(e) {
+  const selection = window.getSelection();
+  const text = selection.toString().trim();
 
-// 🚨 ANTI DOUBLE CLICK
-if(isSelecting) return
-isSelecting = true
-setTimeout(()=>{ isSelecting = false }, 200)
+  if (!text) return;
+  if (!selection.rangeCount) return;
 
-let selection = window.getSelection()
-let text = selection.toString().trim()
+  const range = selection.getRangeAt(0);
+  let parent = range.commonAncestorContainer;
+  let elementParent = parent.nodeType === 3 ? parent.parentNode : parent;
 
-// 🚨 FILTER DOUBLE CLICK (1 huruf / auto select)
-if(!text || text.length < 2) return
+  // jangan bikin note di dalam note yang sudah ada
+  if (elementParent.closest(".note")) {
+    selection.removeAllRanges();
+    return;
+  }
 
-let range = selection.getRangeAt(0)
+  // area yang boleh di-note: passage atau question
+  const allowedArea = elementParent.closest(".passage, .question");
 
-// 🔥 bikin DOM rapi dulu
-range.commonAncestorContainer.normalize()
+  // area yang dilarang
+  const blockedArea = elementParent.closest(
+    ".option, .review-question, #result, #review, button, .bookmark-btn"
+  );
 
-// hanya block kalau full di dalam note
-if(isInsideNote(range.startContainer) && isInsideNote(range.endContainer)){
-return
+  if (!allowedArea || blockedArea) {
+    selection.removeAllRanges();
+    return;
+  }
+
+  const span = document.createElement("span");
+  span.className = "note";
+
+  const textNode = document.createElement("span");
+  textNode.className = "note-hanzi";
+  textNode.innerText = text;
+
+  const icon = document.createElement("span");
+  icon.className = "note-icon";
+  icon.innerText = "✏️";
+
+  icon.onclick = function (ev) {
+    ev.stopPropagation();
+
+    let old = document.querySelector(".note-popup");
+    if (old) old.remove();
+
+    const popup = document.createElement("div");
+    popup.className = "note-popup";
+
+    popup.innerHTML = `
+      <input type="text" placeholder="arti / pinyin">
+      <br>
+      <div style="margin-top:8px; display:flex; gap:6px;">
+        <button onclick="saveInlineNote(this)">Save</button>
+        <button onclick="removeInlineNote(this)">Delete</button>
+        <button onclick="closePopup(this)">Cancel</button>
+      </div>
+    `;
+
+    document.body.appendChild(popup);
+    popup.style.top = ev.pageY + "px";
+    popup.style.left = ev.pageX + "px";
+    popup.targetSpan = span;
+  };
+
+  span.appendChild(textNode);
+  span.appendChild(icon);
+
+  range.deleteContents();
+  range.insertNode(span);
+
+  selection.removeAllRanges();
 }
 
-let parent = range.commonAncestorContainer
+function removeInlineNote(btn) {
+  const popup = btn.closest(".note-popup");
+  if (!popup || !popup.targetSpan) return;
 
-while(parent && parent !== document.body){
+  const span = popup.targetSpan;
+  const textNode = document.createTextNode(span.childNodes[0]?.textContent || span.innerText.replace("✏️", "").trim());
 
-if(parent.classList && parent.classList.contains("note")){
-return
-}
-
-parent = parent.parentNode
-}
-
-let span = document.createElement("span")
-span.className = "note"
-span.innerText = text
-
-let icon = document.createElement("span")
-icon.className = "note-icon"
-icon.innerText = "✏️"
-
-icon.onclick = function(ev){
-
-ev.stopPropagation()
-
-let old = document.querySelector(".note-popup")
-if(old) old.remove()
-
-let popup = document.createElement("div")
-popup.className = "note-popup"
-
-popup.innerHTML = `
-<input type="text" placeholder="arti / pinyin">
-<br>
-<div style="margin-top:8px; display:flex; gap:5px;">
-<button onclick="saveInlineNote(this)">Save</button>
-<button onclick="closePopup(this)">Cancel</button>
-</div>
-`
-
-document.body.appendChild(popup)
-
-popup.style.top = ev.pageY + "px"
-popup.style.left = ev.pageX + "px"
-
-popup.targetSpan = span
-
-}
-
-span.appendChild(icon)
-
-range.deleteContents()
-range.insertNode(span)
-
-window.getSelection().removeAllRanges()
-
+  span.replaceWith(textNode);
+  popup.remove();
 }
 
 function isInsideNote(node){
@@ -2500,72 +2419,317 @@ addToStudy(word, input)
 popup.remove()
 
 }
-
-function addToStudy(word, note){
-
-studyList.push({word, note})
-
-if(!wordStats[word]){
-wordStats[word] = {count:0, wrong:0}
+function saveStudyNotes() {
+  localStorage.setItem("tocflStudyList", JSON.stringify(studyList));
 }
 
-wordStats[word].count++
-
-}
-function openStudyMode(){
-
-let html = "<h2>Smart Study Mode 🧠</h2>"
-
-let sorted = Object.keys(wordStats).sort((a,b)=>{
-return wordStats[b].wrong - wordStats[a].wrong
-})
-
-sorted.forEach(word=>{
-
-let stat = wordStats[word]
-
-html += `
-<div class="card">
-<div class="word">${word}</div>
-<div class="stat">
-Wrong: ${stat.wrong} | Seen: ${stat.count}
-</div>
-</div>
-`
-
-})
-
-html += `<br><button onclick="backToResult()">Back</button>`
-
-document.getElementById("review").innerHTML = html
-
+function saveWordStats() {
+  localStorage.setItem("tocflWordStats", JSON.stringify(wordStats));
 }
 
-function loadProgress(){
-
-let saved=localStorage.getItem("tocflProgress")
-
-if(saved){
-
-let data=JSON.parse(saved)
-
-questions=data.questions
-current=data.current
-score=data.score
-userAnswers=data.userAnswers
-wrongList=data.wrongList
-bookmarked=data.bookmarked
-
-showQuestion()
-
-}else{
-
-startTest()
-
+function loadStudyNotes() {
+  let saved = localStorage.getItem("tocflStudyList");
+  if (saved) {
+    studyList = JSON.parse(saved);
+  } else {
+    studyList = [];
+  }
 }
-document.addEventListener("dblclick", function(){
-window.getSelection().removeAllRanges()
-})
+
+function loadWordStats() {
+  let saved = localStorage.getItem("tocflWordStats");
+  if (saved) {
+    wordStats = JSON.parse(saved);
+  } else {
+    wordStats = {};
+  }
 }
-document.addEventListener("mouseup", openNoteEditor)
-loadProgress()
+
+function addToStudy(word, note) {
+  word = word.trim();
+  note = note.trim();
+
+  let existing = studyList.find(item => item.word === word);
+
+  if (existing) {
+    existing.note = note;
+  } else {
+    studyList.push({ word, note });
+  }
+
+  if (!wordStats[word]) {
+    wordStats[word] = { count: 0, wrong: 0 };
+  }
+
+  wordStats[word].count++;
+
+  saveStudyNotes();
+  saveWordStats();
+}
+
+function openStudyMode() {
+  let html = "<h2>Smart Study Mode 🧠</h2>";
+
+  let sorted = Object.keys(wordStats).sort((a, b) => {
+    return wordStats[b].wrong - wordStats[a].wrong;
+  });
+
+  if (!sorted.length) {
+    html += `<p>No data yet.</p>`;
+  } else {
+    sorted.forEach(word => {
+      let stat = wordStats[word];
+
+      html += `
+        <div class="card">
+          <div class="word">${word}</div>
+          <div class="stat">
+            Wrong: ${stat.wrong} | Seen: ${stat.count}
+          </div>
+          <div style="margin-top:10px;">
+            <button onclick="deleteWordEverywhere('${word.replace(/'/g, "\\'")}')">Delete</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  html += `
+    <br>
+    <button onclick="resetStudyMode()">Reset Study Data</button>
+    <button onclick="backToResult()">Back</button>
+  `;
+
+  document.getElementById("review").innerHTML = html;
+  document.getElementById("result").style.display = "none";
+  document.getElementById("review").style.display = "block";
+}
+
+function resetStudyMode() {
+  const confirmReset = confirm("Reset all study data?");
+  if (!confirmReset) return;
+
+  // reset data
+  wordStats = {};
+  studyList = [];
+
+  // hapus dari localStorage
+  localStorage.removeItem("tocflStudyList");
+
+  // refresh tampilan
+  openStudyMode();
+}
+function startFlashcard() {
+  document.getElementById("homeScreen").style.display = "none";
+  document.getElementById("quizScreen").style.display = "none";
+  document.getElementById("result").style.display = "none";
+  document.getElementById("review").style.display = "block";
+  document.getElementById("nextBtn").style.display = "none";
+
+  if (!studyList.length) {
+    document.getElementById("review").innerHTML = `
+      <h2>Flashcard Mode 🃏</h2>
+      <p>Belum ada vocab dari note kamu.</p>
+      <p>Highlight dulu kata di soal, lalu isi artinya.</p>
+      <button onclick="showHome()">Back</button>
+    `;
+    return;
+  }
+
+  flashcards = [...studyList];
+  flashIndex = 0;
+  showAnswer = false;
+
+  showFlashcard();
+}
+
+function showFlashcard() {
+  let card = flashcards[flashIndex];
+
+  let html = `
+    <h2>Flashcard Mode 🃏</h2>
+
+    <div class="card flashcard" onclick="flipCard()">
+      ${
+        !showAnswer
+          ? `
+            <div class="flash-word">${card.word}</div>
+            <div class="flash-hint">Klik untuk lihat arti</div>
+          `
+          : `
+            <div class="flash-word">${card.word}</div>
+            <div class="flash-note">${card.note || ""}</div>
+            <div class="flash-pinyin">${getPinyin(card.word)}</div>
+            <div class="flash-hint">Klik untuk tutup</div>
+          `
+      }
+    </div>
+
+    <div style="margin-top:20px; display:flex; gap:10px; justify-content:center; align-items:center;">
+      <button onclick="prevFlash()">⬅ Prev</button>
+      <span>${flashIndex + 1} / ${flashcards.length}</span>
+      <button onclick="nextFlash()">Next ➜</button>
+    </div>
+
+    <div style="margin-top:14px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+      <button onclick="deleteWordEverywhere('${card.word.replace(/'/g, "\\'")}')">Delete</button>
+      <button onclick="resetFlashcard()">Reset Flashcards</button>
+      <button onclick="showHome()">Back to Home</button>
+    </div>
+  `;
+
+  document.getElementById("review").innerHTML = html;
+}
+function resetFlashcard() {
+  const confirmReset = confirm("Reset all flashcards?");
+  if (!confirmReset) return;
+
+  studyList = [];
+  localStorage.removeItem("tocflStudyList");
+
+  document.getElementById("review").innerHTML = `
+    <h2>Flashcard Mode 🃏</h2>
+    <p>Flashcards cleared.</p>
+    <button onclick="showHome()">Back</button>
+  `;
+}
+
+function flipCard() {
+  showAnswer = !showAnswer;
+  showFlashcard();
+}
+
+function nextFlash() {
+  flashIndex = (flashIndex + 1) % flashcards.length;
+  showAnswer = false;
+  showFlashcard();
+}
+
+function prevFlash() {
+  flashIndex = (flashIndex - 1 + flashcards.length) % flashcards.length;
+  showAnswer = false;
+  showFlashcard();
+}
+
+function loadProgress() {
+  let saved = localStorage.getItem("tocflProgress");
+  
+
+  if (saved) {
+    let data = JSON.parse(saved);
+
+    questions = data.questions || [];
+    current = data.current || 0;
+    score = data.score || 0;
+    userAnswers = data.userAnswers || [];
+    wrongList = data.wrongList || [];
+    bookmarked = data.bookmarked || [];
+
+    if (!questions.length) {
+      showHome();
+      return;
+    }
+
+    if (current >= questions.length) {
+      showQuiz();
+      finish();
+      return;
+    }
+
+    showQuiz();
+    document.getElementById("result").style.display = "none";
+    document.getElementById("review").style.display = "none";
+    showQuestion();
+  } else {
+    showHome();
+  }
+}
+
+function deleteFlashcardWord(word) {
+  const ok = confirm(`Delete "${word}" from flashcards?`);
+  if (!ok) return;
+
+  studyList = studyList.filter(item => item.word !== word);
+  localStorage.setItem("tocflStudyList", JSON.stringify(studyList));
+
+  if (!studyList.length) {
+    document.getElementById("review").innerHTML = `
+      <h2>Flashcard Mode 🃏</h2>
+      <p>No flashcards left.</p>
+      <button onclick="showHome()">Back</button>
+    `;
+    return;
+  }
+
+  flashcards = [...studyList];
+
+  if (flashIndex >= flashcards.length) {
+    flashIndex = flashcards.length - 1;
+  }
+
+  showAnswer = false;
+  showFlashcard();
+}
+
+function deleteStudyWord(word) {
+  const ok = confirm(`Delete "${word}" from Smart Study?`);
+  if (!ok) return;
+
+  delete wordStats[word];
+  localStorage.setItem("tocflWordStats", JSON.stringify(wordStats));
+
+  openStudyMode();
+}
+
+function deleteWordEverywhere(word) {
+  const ok = confirm(`Delete "${word}" from flashcards and study data?`);
+  if (!ok) return;
+
+  studyList = studyList.filter(item => item.word !== word);
+  delete wordStats[word];
+
+  localStorage.setItem("tocflStudyList", JSON.stringify(studyList));
+  localStorage.setItem("tocflWordStats", JSON.stringify(wordStats));
+}
+function deleteWordEverywhere(word) {
+  const ok = confirm(`Delete "${word}" from flashcards and smart study?`);
+  if (!ok) return;
+
+  studyList = studyList.filter(item => item.word !== word);
+  delete wordStats[word];
+
+  localStorage.setItem("tocflStudyList", JSON.stringify(studyList));
+  localStorage.setItem("tocflWordStats", JSON.stringify(wordStats));
+
+  // refresh tampilan yang sedang aktif
+  if (flashcards && flashcards.length) {
+    flashcards = [...studyList];
+
+    if (flashcards.length === 0) {
+      document.getElementById("review").innerHTML = `
+        <h2>Flashcard Mode 🃏</h2>
+        <p>No flashcards left.</p>
+        <button onclick="showHome()">Back</button>
+      `;
+      return;
+    }
+
+    if (flashIndex >= flashcards.length) {
+      flashIndex = flashcards.length - 1;
+    }
+
+    showAnswer = false;
+    showFlashcard();
+  } else {
+    openStudyMode();
+  }
+}
+document.addEventListener("dblclick", function () {
+  window.getSelection().removeAllRanges();
+});
+
+document.addEventListener("mouseup", openNoteEditor);
+
+loadStudyNotes();
+loadWordStats();
+loadProgress();

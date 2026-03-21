@@ -1,37 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <script src="https://unpkg.com/pinyin-pro"></script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TOCFL Reading Mock Test</title>
-<link rel="stylesheet" href="style.css">
-
-<script src="https://unpkg.com/pinyin-pro/dist/index.js"></script>
+  
+  <script src="https://unpkg.com/pinyin-pro"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TOCFL Reading Mock Test</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/pinyin-pro/dist/index.js"></script>
 </head>
-
 <body>
+  <div class="container">
 
-<div class="container">
+    <div id="homeScreen" class="home">
+  <div class="home-card">
+    <div class="home-badge">TOCFL B Level</div>
 
-<h1>TOCFL Reading Mock Test</h1>
+    <h1>TOCFL Practice</h1>
+    <p class="subtitle">Reading Mock Test</p>
 
-<div class="progress-bar-container">
-  <div id="progressBar"></div>
+    <div class="guide-list">
+      <div class="guide-item">Full test simulation</div>
+      <div class="guide-item">Highlight to save notes</div>
+      <div class="guide-item">Auto flashcards</div>
+    </div>
+
+    <div class="home-actions">
+      <button class="primary-btn" onclick="startTest()">Start Test</button>
+      <button class="secondary-btn" onclick="startFlashcard()">Flashcards</button>
+    </div>
+
+    <p class="credit">By Jiefi</p>
+  </div>
 </div>
 
-<div id="quiz"></div>
+      
+   <div id="quizScreen" style="display:none;">
+  <div class="quiz-header">
+    <h1>TOCFL Reading Mock Test</h1>
+    <button class="home-top-btn" onclick="goHome()">Home</button>
+  </div>
 
-<button id="nextBtn">Next</button>
+  <div class="progress-bar-container">
+    <div id="progressBar"></div>
+  </div>
 
-<div id="result"></div>
-
-<div id="review"></div>
-
+  <div id="quiz"></div>
+  <button id="nextBtn">Next</button>
 </div>
 
-<script src="script.js" defer></script>
+    <div id="result"></div>
+    <div id="review"></div>
 
+  </div>
+
+  <script src="script.js" defer></script>
 </body>
 </html>
